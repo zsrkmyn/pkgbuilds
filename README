@@ -1,0 +1,7 @@
+This repo keeps some PKGBUILDs used by myself.
+
+These PKGBUILDs are:
+
+1. originally from AUR, and modified by myself to make it can be compiled successfully or suitable for my machine;
+2. written by myself but won't upload to AUR due to my laziness or unseemliness of sharing;
+3. totally differently from the AUR's ones for the same packages becasue the AUR's are awful AFAIC.

@@ -1,0 +1,6 @@
+*.tgz
+*.tar*
+*.zip
+*.xz
+*.log
+*.SRCINFO
