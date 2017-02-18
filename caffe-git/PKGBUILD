@@ -1,3 +1,5 @@
+# Maintainer Stephen Zhang <zsrkmyn at gmail dot com>
+
 _pkgname=caffe
 pkgname=$_pkgname-git
 pkgver=rc4.r40.g9bb1b9cde
@@ -23,7 +25,7 @@ optdepends=('cuda: for GPU support'
 			'python-yaml: for Python3 support'
 			'python-pillow: for Python3 support'
 			'ipython: for Python3 support'
-			#'python-leveldb' # not found
+			'python-leveldb: for Python3 support' # in my repo
 			)
 source=("git+https://github.com/BVLC/$_pkgname.git"
         "Makefile.config")
