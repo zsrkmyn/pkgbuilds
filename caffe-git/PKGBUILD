@@ -1,0 +1,79 @@
+_pkgname=caffe
+pkgname=$_pkgname-git
+pkgver=rc4.r40.g9bb1b9cde
+pkgrel=1
+pkgdesc="Neural network toolkit"
+arch=('i686' 'x86_64')
+url="https://github.com/BVLC/caffe"
+license=('BSD')
+depends=('intel-mkl' 'hdf5' 'opencv' 'boost' 'protobuf' 'google-glog'
+		 'gflags' 'leveldb' 'snappy' 'lmdb' 'xz')
+makedepends=('git' 'cmake')
+optdepends=('cuda: for GPU support'
+            'cython: for Python3 support'
+			'python-scikit-image: for Python3 support' # AUR
+			'python-numpy: for Python3 support'
+			'python-h5py: for Python3 support'
+			'python-networkx: for Python3 support'
+			'python-nose: for Python3 support'
+			'python-pandas: for Python3 support'
+			'python-dateutil: for Python3 support'
+			'python-protobuf: for Python3 support'
+			'python-gflags: for Python3 support'
+			'python-yaml: for Python3 support'
+			'python-pillow: for Python3 support'
+			'ipython: for Python3 support'
+			#'python-leveldb' # not found
+			)
+source=("git+https://github.com/BVLC/$_pkgname.git"
+        "Makefile.config")
+sha256sums=('SKIP'
+            'f5f4b4ce7fb8a7c607275660eb7c563037cf0d95a2e18089039863a1aa3dc31f')
+
+pkgver() {
+	cd $srcdir/caffe
+	set -o pipefail
+	git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+    cd "$srcdir/$_pkgname"
+	cp ../Makefile.config .
+
+    make all
+}
+
+#check() {
+#    cd "$srcdir/$_pkgname"
+#	make test
+#	make runtest
+#}
+
+package() {
+	cd $srcdir/caffe
+	make dist
+	cd distribute
+
+	python -m compileall python/caffe
+	install -dm755 "$pkgdir/usr/lib/python3.6/site-packages/caffe/"
+	rm python/caffe/*.cpp
+	cp -r python/caffe/* "$pkgdir/usr/lib/python3.6/site-packages/caffe/"
+
+	install -dm755 "$pkgdir/usr/lib/"
+	install -Dm755 lib/* "${pkgdir}/usr/lib/"
+
+	install -dm755 "$pkgdir/usr/include/"
+	cp -r include/* "${pkgdir}/usr/include/"
+
+	install -dm755 "$pkgdir/usr/bin/"
+	cd bin
+	for i in ./*; do
+		cp $i "$pkgdir/usr/bin/${i%%.bin}"
+	done
+	cd ..
+
+	install -dm644 "$pkgdir/usr/share/$_pkgname"
+	cp -r proto "$pkgdir/usr/share/$_pkgname"
+
+	install -Dm644 ../LICENSE "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+}
