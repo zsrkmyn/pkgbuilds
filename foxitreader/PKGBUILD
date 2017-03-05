@@ -1,0 +1,77 @@
+# Maintainer: Muflone http://www.muflone.com/contacts/english/
+# Contributor: Stephen Zhang <zsrkmyn at gmail dot com>
+# Contributor: TDY <tdy@archlinux.info>
+
+pkgname=foxitreader
+pkgver=2.3.0.2174
+_frrev_i686=r242174
+_frrev_x86_64=${_frrev_i686}
+pkgrel=1
+pkgdesc="A fast, secure and complete PDF viewer"
+arch=('i686' 'x86_64')
+url="https://www.foxitsoftware.com/products/pdf-reader/"
+license=('custom:EULA')
+makedepends=('qt-installer-framework' 'qt5-tools' 'p7zip')
+depends=('desktop-file-utils' 'qt5-declarative' 'libsecret')
+source=("https://www.foxitsoftware.com/products/pdf-reader/eula.html"
+        "${pkgname}.patch")
+source_i686=("http://cdn02.foxitsoftware.com/pub/foxit/reader/desktop/linux/2.x/${pkgver%.*.*}/en_us/FoxitReader${pkgver}_Server_x86_enu_Setup.run.tar.gz")
+source_x86_64=("http://cdn02.foxitsoftware.com/pub/foxit/reader/desktop/linux/2.x/${pkgver%.*.*}/en_us/FoxitReader${pkgver}_Server_x64_enu_Setup.run.tar.gz")
+sha256sums=('738fc621a727e0429b9c50580b3c166776797f925f2819037d1414dad0b95f6a'
+			'f25d9b808bf9b56a0dd1d7646b1981db24cb0abca88f6da93b201c7d10d8b394')
+sha256sums_i686=('faa6ae03441a8ecf2c614fd20cd059a0027df6ea3e315101c71127014d9ada33')
+sha256sums_x86_64=('c6294d0e9e413deb4f1bc92367f16344570148fb82ba8b7a0a49acec7b9161f6')
+
+build() {
+  # Clean installer dir
+  if [ -d "${pkgname}-installer" ]
+  then
+    rm -rf "${pkgname}-installer"
+  fi
+  # Decompress .run installer
+  if [ "${CARCH}" = 'x86_64' ]
+  then
+    _file_run="FoxitReader.enu.setup.${pkgver}(${_frrev_x86_64}).x64.run"
+  else
+    _file_run="FoxitReader.enu.setup.${pkgver}(${_frrev_i686}).x86.run"
+  fi
+  devtool --dump "${pkgname}-installer" "${_file_run}"
+}
+
+package() {
+  cd "${pkgname}-installer/metadata/Install Foxit Reader"
+  # Decompress files
+  install -dm755 "${pkgdir}/opt/${pkgname}"
+  for file in *.7z
+  do
+    7z x -o"${pkgdir}/opt/${pkgname}" ${file} > /dev/null
+  done
+  # Apply final patches
+  cd "${pkgdir}"
+  patch -p1 -i "${srcdir}/${pkgname}.patch"
+  # Remove useless files
+  cd "${pkgdir}/opt/${pkgname}"
+  rm "Activation" "Activation.desktop" "Activation.sh" \
+     "countinstalltion" "countinstalltion.sh" \
+     "installUpdate" "ldlibrarypath.sh" \
+     "maintenancetool.sh" "Uninstall.desktop" \
+     "Update.desktop" "updater" "updater.sh"
+  find -name .svn -exec rm -rf {} +
+  find -name .directory -exec rm -rf {} +
+  # Install icon and desktop files
+  install -m 755 -d "${pkgdir}/usr/share/pixmaps"
+  install -m 644 "images/FoxitReader.png" \
+    "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
+  install -m 755 -d "${pkgdir}/usr/share/applications"
+  install -m 755 "FoxitReader.desktop" \
+    "${pkgdir}/usr/share/applications/${pkgname}.desktop"
+  rm FoxitReader.desktop
+  # Install license file
+  install -m 755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
+  install -m 644 -t "${pkgdir}/usr/share/licenses/${pkgname}" "${srcdir}/eula.html"
+  # Install launcher script
+  cd "${pkgdir}"
+  install -m 755 -d "${pkgdir}/usr/bin"
+  ln -s "/opt/${pkgname}/FoxitReader.sh" "${pkgdir}/usr/bin/${pkgname}"
+}
+
