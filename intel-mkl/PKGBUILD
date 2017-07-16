@@ -1,9 +1,8 @@
 # Maintainer: Stephen Zhang <zsrkmyn at gmail dot com>
 pkgname=intel-mkl
 pkgver=2017.0.098
-pkgrel=1
-epoch=
-pkgdesc="Intel(R)® Math Kernel Libray"
+pkgrel=2
+pkgdesc="Intel(R) Math Kernel Libray"
 arch=('x86_64')
 url="https://software.intel.com/en-us/intel-mkl"
 license=('custom')
@@ -13,6 +12,7 @@ source=("http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/9662/l_m
 md5sums=('3cdcb739ab5ab1e047eb130b9ffdd8d0'
          '9e9a761dc9cfb598b66baf409c087ff4'
          'f2b6e23e4f2c7a0cd26ac14b920fcd94')
+options=(staticlibs)
 
 build() {
 	cd "l_mkl_$pkgver"
@@ -32,15 +32,14 @@ package() {
 	cd "l_mkl_$pkgver/build"
 	install -Dm 644 ../license.txt "$pkgdir/usr/share/licenses/intel-mkl"
 
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/mkl/benchmarks/
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/mkl/lib/*mic
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/mkl/.marker*
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/tbb/lib/ia32{,_lin}
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/compiler/lib/intel64_lin_mic/
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/linux/bin/
+	cd opt/intel/compilers_and_libraries_$pkgver/linux/
+	rm -r \
+		mkl/benchmarks/ mkl/lib/*mic mkl/.marker* tbb/lib/ia32{,_lin} \
+		compiler/lib/intel64_lin_mic/ bin/
+	cd -
 
-	mv opt/intel/compilers_and_libraries_2017.0.098/linux/* opt/intel/
-	rm -r opt/intel/compilers_and_libraries_2017.0.098/
+	mv opt/intel/compilers_and_libraries_$pkgver/linux/* opt/intel/
+	rm -r opt/intel/compilers_and_libraries_$pkgver/
 
 	rm -r opt/intel/parallel_studio_xe_2017.0.035/
 
